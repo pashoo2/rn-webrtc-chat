@@ -1,0 +1,21 @@
+{
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "parser": "babel-eslint",
+  "plugins": ["react-native"],
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "jest": true,
+    "es6": true,
+    "react-native/react-native": true
+  },
+  "rules": {
+    "no-use-before-define": "off",
+    "react/jsx-filename-extension": "off",
+    "react/prop-types": "off"
+  }
+}
