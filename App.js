@@ -27,12 +27,12 @@ export default class App extends Component {
   get ssConnectionStatus() {
     const signalConnection = this.signalConnection.get();
 
-    return connectionStatus(signalConnection);
+    return this.connectionStatus(signalConnection);
   }
   get peerConnectionStatus() {
     const peerConnection = this.peerConnection.get();
 
-    return connectionStatus(peerConnection);
+    return this.connectionStatus(peerConnection);
   }
   get userId() {
     const signalConnection = this.signalConnection.get();
@@ -59,6 +59,7 @@ export default class App extends Component {
     return (
       <ScrollView>
         <Text>Signal server connection status: {this.ssConnectionStatus}</Text>
+        <Text>Peer connection status: {this.peerConnectionStatus}</Text>
         <Text>UserId:</Text>
         <TextInput
           style={styles.txtInput}
@@ -68,7 +69,7 @@ export default class App extends Component {
         <Text>ReceiverId:</Text>
         <TextInput
           style={styles.txtInput}
-          value={this.userId}
+          value={this.receiverId}
           multiline={false}
           onChangeText={this.setReceiverId}
         />
@@ -84,20 +85,7 @@ export default class App extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  txtInput: {
+    borderWidth: 1,
   },
 });

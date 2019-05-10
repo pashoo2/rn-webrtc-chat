@@ -6,13 +6,13 @@ let connections = []; // <{ userId, socket }>[]
 
 externalip((err, extIp) => {
   if (err) {
-    return console.error(err);
+    console.error(err);
   }
 
   const io = require('socket.io')(app);
 
-  app.listen(config.port, 'localhost', () => {
-    console.log(`The server is available on ${extIp}:${config.port}`);
+  app.listen(config.port, '127.0.0.1', () => {
+    console.log(`The server is available on 127.0.0.1:${config.port}`);
   });
   io.on('connection', socket => {
     const userId = uuid();
