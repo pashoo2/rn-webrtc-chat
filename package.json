@@ -17,6 +17,7 @@
     "mobx-react": "^5.4.3",
     "react": "16.8.3",
     "react-native": "0.59.8",
+    "react-native-webrtc": "^1.69.1",
     "socket.io-client": "^2.2.0"
   },
   "devDependencies": {

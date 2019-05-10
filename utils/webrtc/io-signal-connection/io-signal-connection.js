@@ -93,6 +93,43 @@ class IOSignalConnection {
       }
     });
   };
+
+  send = message => {
+    this.socket.emit(SERVER_MESSAGE_TYPES.PEER_MESSAGE, String(message));
+  };
+
+  sendCandidate = ({ to, payload }) => {
+    this.send(
+      new PeerMessage({
+        type: PEER_MESSAGE_TYPES.CANDIDATE,
+        to,
+        from: this.userId,
+        payload,
+      })
+    );
+  };
+
+  sendOffer = ({ to, payload }) => {
+    this.send(
+      new PeerMessage({
+        type: PEER_MESSAGE_TYPES.OFFER,
+        to,
+        from: this.userId,
+        payload,
+      })
+    );
+  };
+
+  sendAnswer = ({ to, payload }) => {
+    this.send(
+      new PeerMessage({
+        type: PEER_MESSAGE_TYPES.ANSWER,
+        to,
+        from: this.userId,
+        payload,
+      })
+    );
+  };
 }
 
 export default IOSignalConnection;
