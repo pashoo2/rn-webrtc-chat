@@ -6,6 +6,7 @@ import {
 import { observable, reaction } from 'mobx';
 import { PEER_CONNECTION_CONF } from './wrtc-connection.const';
 import { PEER_MESSAGE_TYPES } from '../io-signal-connection/io-signal-connection.const';
+import { getLocalStreamDevice } from '../stream';
 
 /**
  * create and handle WebRTC connection to another peer
@@ -27,19 +28,28 @@ class WRTCConnection {
   peerConnection = null;
   isCaller = false;
   stopSignalMessageListener = null;
+  stream = null;
 
   constructor({ signalServerConnection, receicerId, isCaller }) {
     this.ssConnection = signalServerConnection;
     this.userId = signalServerConnection.userID;
     this.receiverUserId = receicerId;
     this.isCaller = isCaller;
+    this.createStream();
+  }
+
+  async createStream() {
+    this.stream = await getLocalStreamDevice();
     this.startConnection();
     this.setSignalMessageHandlers();
   }
 
   startConnection() {
-    this.peerConnection = new RTCPeerConnection(PEER_CONNECTION_CONF);
+    const peerConnection = new RTCPeerConnection(PEER_CONNECTION_CONF);
+
+    this.peerConnection = peerConnection;
     this.setPCHandlers();
+    peerConnection.addStream(this.stream);
   }
 
   createOffer = async () => {
