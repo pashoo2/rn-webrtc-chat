@@ -15,7 +15,7 @@ import { getLocalStreamDevice } from '../stream';
  */
 class WRTCConnection {
   @observable streamUrl = '';
-  @observable connectionState = '';
+  @observable connectionStatus = '';
 
   ssConnection = null;
   userId = null;
@@ -91,7 +91,7 @@ class WRTCConnection {
   oniceconnectionstatechangeHandler = e => {
     const { target: peerConnection } = e;
 
-    this.connectionState = peerConnection.iceConnectionState;
+    this.connectionStatus = peerConnection.iceConnectionState;
   };
 
   setPCHandlers() {
