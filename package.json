@@ -3,10 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "start": "npm run kill & node node_modules/react-native/local-cli/cli.js start",
+    "kill": "fuser -n tcp -k 8081",
     "start:server": "node ./signal-server",
     "lint": "eslint --fix ./**/*.js",
-    "test": "jest"
+    "test": "jest",
+    "android": "npm run kill & react-native run-android"
   },
   "dependencies": {
     "mobx": "^5.9.4",
@@ -18,6 +20,7 @@
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/plugin-transform-flow-strip-types": "^7.4.4",
     "@babel/runtime": "^7.4.4",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.8.0",
