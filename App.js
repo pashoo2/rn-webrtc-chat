@@ -1,27 +1,35 @@
 import React, { Component } from 'react';
-import { Text, ScrollView, StyleSheet } from 'react-native';
+import { Text, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import IOSignalConnection from './utils/webrtc/io-signal-connection';
 
 @observer
 export default class App extends Component {
-  @observable.box signalConnection = null;
+  signalConnection = observable.box(null, { deep: true });
 
   get ssConnectionStatus() {
-    return String(
-      this.signalConnection ? this.signalConnection.connectionStatus : ''
-    );
+    const signalConnection = this.signalConnection.get();
+
+    return String(signalConnection ? signalConnection.connectionStatus : '');
+  }
+
+  get userId() {
+    const signalConnection = this.signalConnection.get();
+
+    return String(signalConnection ? signalConnection.userId : '');
   }
 
   componentDidMount() {
-    this.signalConnection = new IOSignalConnection();
+    this.signalConnection.set(new IOSignalConnection());
   }
 
   render() {
     return (
       <ScrollView>
-        <Text>{this.ssConnectionStatus()}</Text>
+        <Text>Signal server connection status: {this.ssConnectionStatus}</Text>
+        <Text>UserId:</Text>
+        <TextInput value={this.userId} multiline={false} />
       </ScrollView>
     );
   }

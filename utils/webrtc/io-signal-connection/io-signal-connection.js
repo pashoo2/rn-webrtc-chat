@@ -30,20 +30,27 @@ class IOSignalConnection {
       `http://${SIGNAL_SERVER_CONNECTION_CONFIG.host}:${
         SIGNAL_SERVER_CONNECTION_CONFIG.port
       }`,
-      { transports: ['websocket'] }
+      {
+        transports: ['websocket'],
+      }
     );
+    this.setHandlers();
   }
 
   setHandlers() {
     const { socket } = this;
 
     socket.on('connect', this.handleConnectionOpen);
+    socket.on('connect_error', this.setErrorState);
+    socket.on('connect_timeout', this.setErrorState);
   }
+
+  setErrorState = () =>
+    (this.connectionStatus = SIGNAL_SERVER_CONNECTION_STATUS.ERROR);
 
   clearPeerMessagesList = () => this.peerMessages.clear();
 
   handleConnectionOpen = () => {
-    debugger;
     this.connectionStatus = SIGNAL_SERVER_CONNECTION_STATUS.OPEN;
     this.setMessageHandlers();
   };
@@ -69,7 +76,8 @@ class IOSignalConnection {
   };
 
   setMessageHandlers = (handlersList = this.serverMessageHandlers) => {
-    const messageTypes = Object.keys(SERVER_MESSAGE_TYPES);
+    const messageTypes = Object.values(SERVER_MESSAGE_TYPES);
+    const socket = this.socket;
 
     messageTypes.forEach(msgType => {
       const handler = handlersList[msgType];

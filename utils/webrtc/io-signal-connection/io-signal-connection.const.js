@@ -1,5 +1,7 @@
-export const SIGNAL_SERVER_CONNECTION_CONFIG = require('../../../signal-server/signal-server.conf.json')
-  .default;
+export const SIGNAL_SERVER_CONNECTION_CONFIG = {
+  host: '10.0.2.2',
+  port: 3000,
+};
 
 export const SIGNAL_SERVER_CONNECTION_STATUS = {
   EMPTY: 'empty',
@@ -7,6 +9,7 @@ export const SIGNAL_SERVER_CONNECTION_STATUS = {
   OPEN: 'open',
   GOT_USER_ID: 'user id',
   CLOSE: 'close',
+  ERROR: 'error',
 };
 
 export const SERVER_MESSAGE_TYPES = {
