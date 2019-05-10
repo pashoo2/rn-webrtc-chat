@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
-import { MediaStreamTrack, getUserMedia } from 'react-native-webrtc';
+import { MediaStreamTrack } from 'react-native-webrtc';
+import getUserMedia from 'react-native-webrtc/getUserMedia';
 
 export const getLocalStreamDevice = async isFront => {
   let videoSourceId;
@@ -18,7 +19,7 @@ export const getLocalStreamDevice = async isFront => {
       }
     }
   }
-
+  debugger;
   return getUserMedia({
     audio: true,
     video: {

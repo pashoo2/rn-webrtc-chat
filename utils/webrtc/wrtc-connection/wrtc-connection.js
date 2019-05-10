@@ -30,29 +30,39 @@ class WRTCConnection {
   stopSignalMessageListener = null;
   stream = null;
 
-  constructor({ signalServerConnection, receicerId, isCaller }) {
+  constructor({ signalServerConnection, receiverId, isCaller }) {
+    debugger;
     this.ssConnection = signalServerConnection;
     this.userId = signalServerConnection.userID;
-    this.receiverUserId = receicerId;
+    this.receiverUserId = receiverId;
     this.isCaller = isCaller;
     this.createStream();
   }
 
   async createStream() {
-    this.stream = await getLocalStreamDevice();
+    try {
+      this.stream = await getLocalStreamDevice();
+    } catch (err) {
+      debugger;
+      console.error(err);
+      return;
+    }
+    debugger;
     this.startConnection();
     this.setSignalMessageHandlers();
   }
 
   startConnection() {
     const peerConnection = new RTCPeerConnection(PEER_CONNECTION_CONF);
-
+    debugger;
     this.peerConnection = peerConnection;
     this.setPCHandlers();
+    debugger;
     peerConnection.addStream(this.stream);
   }
 
   createOffer = async () => {
+    debugger;
     const peerConnection = this.peerConnection;
     const offerSDP = await peerConnection.createOffer();
 
@@ -74,6 +84,7 @@ class WRTCConnection {
 
   onnegotiationneededHandler = () => {
     if (this.isCaller) {
+      debugger;
       this.createOffer();
     }
   };

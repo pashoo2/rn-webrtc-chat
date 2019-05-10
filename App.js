@@ -18,7 +18,9 @@ export default class App extends Component {
   signalConnection = observable.box(null, { deep: true });
   peerConnection = observable.box(null, { deep: true });
 
-  setReceiverId = text => (this.receiverId = text);
+  setReceiverId = text => {
+    this.receiverId = text;
+  };
   connectionStatus(connectionInstance) {
     return String(
       connectionInstance ? connectionInstance.connectionStatus : ''
@@ -42,14 +44,21 @@ export default class App extends Component {
   startCall = () => this.createPeerConnection(true);
   startWaiting = () => this.createPeerConnection(false);
   createPeerConnection(isCaller = false) {
-    if (this.IOSignalConnection.get() && this.receiverId) {
-      this.peerConnection.set(
-        new WRTCConnection({
-          signalServerConnection: this.IOSignalConnection.get(),
-          receicerId: this.receiverId,
-          isCaller,
-        })
-      );
+    const signalServerConnection = this.signalConnection.get();
+    const receiverId = String(this.receiverId);
+
+    if (signalServerConnection) {
+      if (!receiverId) {
+        console.error('There is no receiverId was defined');
+      } else {
+        this.peerConnection.set(
+          new WRTCConnection({
+            signalServerConnection,
+            receiverId,
+            isCaller,
+          })
+        );
+      }
     }
   }
   componentDidMount() {

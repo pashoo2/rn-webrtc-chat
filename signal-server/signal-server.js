@@ -23,6 +23,24 @@ externalip((err, extIp) => {
       socket,
     });
     socket.emit('user::set::id', userId);
+    socket.on('user::to:peer', msg => {
+      const { to: receiverUserId } = msg;
+      const conectionDesc = connections.find(
+        ({ userId }) => userId === receiverUserId
+      );
+
+      if (conectionDesc) {
+        const { connection } = conectionDesc;
+
+        console.info(
+          `Message with type ${msg.type} from ${userId} to ${receiverUserId}`
+        );
+        connection.emit({
+          ...msg,
+          from: userId,
+        });
+      }
+    });
     socket.on('disconnect', function() {
       connections = connections.filter(
         ({ userId: connectionUserId }) => connectionUserId !== userId
