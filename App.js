@@ -1,30 +1,28 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
+import React, { Component } from 'react';
+import { Text, ScrollView, StyleSheet } from 'react-native';
+import { observable } from 'mobx';
+import { observer } from 'mobx-react';
+import IOSignalConnection from './utils/webrtc/io-signal-connection';
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+@observer
+export default class App extends Component {
+  @observable.box signalConnection = null;
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+  get ssConnectionStatus() {
+    return String(
+      this.signalConnection ? this.signalConnection.connectionStatus : ''
+    );
+  }
 
-type Props = {};
-export default class App extends Component<Props> {
+  componentDidMount() {
+    this.signalConnection = new IOSignalConnection();
+  }
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-      </View>
+      <ScrollView>
+        <Text>{this.ssConnectionStatus()}</Text>
+      </ScrollView>
     );
   }
 }
