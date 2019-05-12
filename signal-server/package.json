@@ -1,7 +1,8 @@
 {
   "main": "signal-server.js",
   "scripts": {
-    "start": "node ./signal-server.js"
+    "start": "node ./signal-server.js",
+    "debug": "node --inspect ./signal-server.js"
   },
   "dependencies": {
     "externalip": "^1.0.2",

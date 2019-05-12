@@ -10,6 +10,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import IOSignalConnection from './utils/webrtc/io-signal-connection';
 import WRTCConnection from './utils/webrtc/wrtc-connection';
+import { RTCView } from 'react-native-webrtc';
 
 @observer
 export default class App extends Component {
@@ -41,6 +42,24 @@ export default class App extends Component {
 
     return String(signalConnection ? signalConnection.userId : '');
   }
+  get streamUrl() {
+    const peerConnection = this.peerConnection.get();
+
+    return peerConnection ? String(peerConnection.streamUrl) : null;
+  }
+  get dataChannelStatus() {
+    const peerConnection = this.peerConnection.get();
+
+    if (peerConnection) {
+      const dc = peerConnection.dataChannel.get();
+
+      if (dc) {
+        return String(dc.status);
+      }
+    }
+
+    return '';
+  }
   startCall = () => this.createPeerConnection(true);
   startWaiting = () => this.createPeerConnection(false);
   createPeerConnection(isCaller = false) {
@@ -69,6 +88,7 @@ export default class App extends Component {
       <ScrollView>
         <Text>Signal server connection status: {this.ssConnectionStatus}</Text>
         <Text>Peer connection status: {this.peerConnectionStatus}</Text>
+        <Text>Data channel status: {this.dataChannelStatus}</Text>
         <Text>UserId:</Text>
         <TextInput
           style={styles.txtInput}
@@ -88,6 +108,10 @@ export default class App extends Component {
         <TouchableOpacity onPress={this.startWaiting}>
           <Text>Waiting for call</Text>
         </TouchableOpacity>
+        <Text>streamUrl: {this.streamUrl}</Text>
+        {this.streamUrl ? (
+          <RTCView streamURL={this.streamUrl} style={styles.selfView} />
+        ) : null}
       </ScrollView>
     );
   }
@@ -96,5 +120,9 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   txtInput: {
     borderWidth: 1,
+  },
+  selfView: {
+    width: 200,
+    height: 150,
   },
 });

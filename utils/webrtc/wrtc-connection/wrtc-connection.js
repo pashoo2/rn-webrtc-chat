@@ -7,6 +7,7 @@ import { observable, reaction } from 'mobx';
 import { PEER_CONNECTION_CONF } from './wrtc-connection.const';
 import { PEER_MESSAGE_TYPES } from '../io-signal-connection/io-signal-connection.const';
 import { getLocalStreamDevice } from '../stream';
+import WRTCDataChannel from './wrtc-datachannel';
 
 /**
  * create and handle WebRTC connection to another peer
@@ -16,6 +17,7 @@ import { getLocalStreamDevice } from '../stream';
 class WRTCConnection {
   @observable streamUrl = '';
   @observable connectionStatus = '';
+  dataChannel = observable.box(null, { deep: false });
 
   ssConnection = null;
   userId = null;
@@ -31,7 +33,6 @@ class WRTCConnection {
   stream = null;
 
   constructor({ signalServerConnection, receiverId, isCaller }) {
-    debugger;
     this.ssConnection = signalServerConnection;
     this.userId = signalServerConnection.userID;
     this.receiverUserId = receiverId;
@@ -43,26 +44,26 @@ class WRTCConnection {
     try {
       this.stream = await getLocalStreamDevice();
     } catch (err) {
-      debugger;
       console.error(err);
       return;
     }
-    debugger;
+    this.start();
+  }
+
+  start = () => {
     this.startConnection();
     this.setSignalMessageHandlers();
-  }
+  };
 
   startConnection() {
     const peerConnection = new RTCPeerConnection(PEER_CONNECTION_CONF);
-    debugger;
+
     this.peerConnection = peerConnection;
     this.setPCHandlers();
-    debugger;
     peerConnection.addStream(this.stream);
   }
 
   createOffer = async () => {
-    debugger;
     const peerConnection = this.peerConnection;
     const offerSDP = await peerConnection.createOffer();
 
@@ -72,6 +73,16 @@ class WRTCConnection {
       payload: offerSDP,
     });
   };
+
+  createDataChannel(dataChannel = null) {
+    this.dataChannel.set(
+      new WRTCDataChannel({
+        peerConnection: this.peerConnection,
+        receiverId: this.receiverUserId,
+        dataChannel,
+      })
+    );
+  }
 
   onicecandidateHandler = e => {
     if (e.candidate) {
@@ -84,7 +95,6 @@ class WRTCConnection {
 
   onnegotiationneededHandler = () => {
     if (this.isCaller) {
-      debugger;
       this.createOffer();
     }
   };
@@ -93,6 +103,10 @@ class WRTCConnection {
 
   onaddstreamHandler = e => {
     this.streamUrl = e.stream.toURL();
+    if (this.isCaller) {
+      //caller must create a data channel
+      this.createDataChannel();
+    }
   };
 
   onremovestreamHandler = () => {
@@ -103,6 +117,16 @@ class WRTCConnection {
     const { target: peerConnection } = e;
 
     this.connectionStatus = peerConnection.iceConnectionState;
+    if (peerConnection.iceConnectionState === 'connected') {
+      console.error('oniceconnectionstatechangeHandler::connected');
+    }
+  };
+
+  ondatachannelHandler = e => {
+    console.error('ondatachannelHandler');
+    const { channel } = e;
+
+    this.createDataChannel(channel);
   };
 
   setPCHandlers() {
@@ -114,32 +138,42 @@ class WRTCConnection {
     peerConnection.onaddstream = this.onaddstreamHandler;
     peerConnection.onremovestream = this.onremovestreamHandler;
     peerConnection.oniceconnectionstatechange = this.oniceconnectionstatechangeHandler;
+    if (!this.isCaller) {
+      // if not a caller than waiting for an incoming data channel
+      peerConnection.ondatachannel = this.ondatachannelHandler;
+    }
   }
 
-  setRemoteDescription = remoteSDP =>
+  setRemoteDescription = remoteSDP => {
     this.peerConnection.setRemoteDescription(
       new RTCSessionDescription(remoteSDP)
     );
+  };
+
+  handleOfferMessage = async payload => {
+    const peerConnection = this.peerConnection;
+    const receiverUserId = this.receiverUserId;
+
+    await this.setRemoteDescription(payload);
+
+    const answerSDP = await peerConnection.createAnswer();
+
+    await peerConnection.setLocalDescription(answerSDP);
+    this.ssConnection.sendAnswer({
+      to: receiverUserId,
+      payload: answerSDP,
+    });
+  };
 
   handlePeerMessage = async msg => {
     const { type, from, payload } = msg;
     const peerConnection = this.peerConnection;
     const receiverUserId = this.receiverUserId;
 
-    if (from === receiverUserId) {
+    if (String(from) === String(receiverUserId)) {
       switch (type) {
         case PEER_MESSAGE_TYPES.OFFER:
-          {
-            await this.setRemoteDescription(payload);
-
-            const answerSDP = await peerConnection.createAnswer();
-
-            await peerConnection.setLocalDescription(answerSDP);
-            this.ssConnection.sendAnswer({
-              to: receiverUserId,
-              payload: answerSDP,
-            });
-          }
+          await this.handleOfferMessage(payload);
           break;
         case PEER_MESSAGE_TYPES.ANSWER:
           await this.setRemoteDescription(payload);

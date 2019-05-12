@@ -4,6 +4,7 @@ import {
   SIGNAL_SERVER_CONNECTION_STATUS,
   SERVER_MESSAGE_TYPES,
   SIGNAL_SERVER_CONNECTION_CONFIG,
+  PEER_MESSAGE_TYPES,
 } from './io-signal-connection.const';
 import PeerMessage from './io-signal-connection-peer-message';
 
@@ -64,13 +65,14 @@ class IOSignalConnection {
   setPeerMessageHandler = () => {
     const { socket } = this;
 
-    socket.on(SIGNAL_SERVER_CONNECTION_STATUS.PEER_MESSAGE, this.onPeerMessage);
+    socket.on(SERVER_MESSAGE_TYPES.PEER_MESSAGE, this.onPeerMessage);
   };
 
   serverMessageHandlers = {
     [SERVER_MESSAGE_TYPES.SET_USER_ID]: userId => {
       this.connectionStatus = SIGNAL_SERVER_CONNECTION_STATUS.GOT_USER_ID;
       this.userId = userId;
+
       this.setPeerMessageHandler();
     },
   };

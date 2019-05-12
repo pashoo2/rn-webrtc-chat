@@ -2,6 +2,7 @@ const config = require('./signal-server.conf.json');
 const app = require('http').createServer(() => {});
 const uuid = require('uuid/v4');
 const externalip = require('externalip');
+const util = require('util');
 let connections = []; // <{ userId, socket }>[]
 
 externalip((err, extIp) => {
@@ -23,22 +24,26 @@ externalip((err, extIp) => {
       socket,
     });
     socket.emit('user::set::id', userId);
-    socket.on('user::to:peer', msg => {
+    socket.on('user::to:peer', msgString => {
+      const msg = JSON.parse(msgString);
       const { to: receiverUserId } = msg;
       const conectionDesc = connections.find(
         ({ userId }) => userId === receiverUserId
       );
 
+      console.log(
+        `message to another peer. Connection was ${
+          conectionDesc ? 'found' : 'not found'
+        } Type ${msg.type}, from: ${msg.from}, to: ${msg.to}`
+      );
       if (conectionDesc) {
-        const { connection } = conectionDesc;
+        const { socket: connection } = conectionDesc;
 
-        console.info(
-          `Message with type ${msg.type} from ${userId} to ${receiverUserId}`
-        );
-        connection.emit({
+        connection.emit('user::to:peer', {
           ...msg,
           from: userId,
         });
+        console.info('message was sent');
       }
     });
     socket.on('disconnect', function() {
