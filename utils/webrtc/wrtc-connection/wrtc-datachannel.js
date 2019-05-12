@@ -1,25 +1,35 @@
 import { observable } from 'mobx';
 import { WRTC_DATA_CHANNEL_STATUS } from './wrtc-connection.const';
+import { poll } from '../../common';
 
 class WRTCDataChannel {
-  receiverId = null;
-  dataChannel = null;
-  peerConnection = null;
   @observable status = WRTC_DATA_CHANNEL_STATUS.EMPTY;
   @observable messagesIncoming = [];
 
-  constructor({ peerConnection, receiverId, dataChannel }) {
+  userId = null;
+  peerId = null;
+  dataChannel = null;
+  peerConnection = null;
+
+  constructor({ userId, peerId, peerConnection, dataChannel }) {
+    debugger;
+    this.userId = userId;
     this.peerConnection = peerConnection;
-    this.receiverId = receiverId;
+    this.peerId = peerId;
     this.dataChannel = dataChannel || this.createChannel();
-    this.status = WRTC_DATA_CHANNEL_STATUS.NEW;
     this.setListeners();
+    this.checkDCState();
   }
 
   createChannel() {
-    return this.peerConnection.createChannel(
-      `Connection with the peer ${this.receiverId}`
+    const dc = this.peerConnection.createDataChannel(
+      '123',
+      { ordered: true }
+      // TODO WRTC_DATA_CHANNEL_OPTIONS // if id is defined it cause app's crash
     );
+
+    this.status = WRTC_DATA_CHANNEL_STATUS.NEW;
+    return dc;
   }
 
   onopenHandler = () => {
@@ -32,13 +42,14 @@ class WRTCDataChannel {
 
   onmessageHandler = e => {
     const { data } = e;
-
+    debugger;
     console.error('datachannel::onmessageHandler', data); // TODO - delete this
     this.messagesIncoming.push(data);
     this.status = WRTC_DATA_CHANNEL_STATUS.TRANSMITTING;
   };
 
   onerrorHandler = err => {
+    debugger;
     console.error(err);
     this.status = WRTC_DATA_CHANNEL_STATUS.ERROR;
   };
@@ -46,11 +57,18 @@ class WRTCDataChannel {
   setListeners() {
     const { dataChannel } = this;
 
-    dataChannel.onopen = this.onopenHandler;
-    dataChannel.onclose = this.oncloseHandler;
-    dataChannel.onerror = this.onerrorHandler;
-    dataChannel.onmessage = this.onmessageHandler;
+    dataChannel.addEventListener('open', this.onopenHandler);
+    dataChannel.addEventListener('close', this.oncloseHandler);
+    dataChannel.addEventListener('error', this.onerrorHandler);
+    dataChannel.addEventListener('message', this.onmessageHandler);
   }
+
+  checkDCState = async () => {
+    const dataChannel = this.dataChannel;
+    debugger;
+    await poll(() => dataChannel && dataChannel.readyState === 'open', 10000);
+    console.error('data channel open');
+  };
 }
 
 export default WRTCDataChannel;

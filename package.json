@@ -7,11 +7,13 @@
     "kill": "fuser -n tcp -k 8081",
     "start:server": "node ./signal-server",
     "debug:server": "node --inspect ./signal-server",
-    "lint": "eslint --fix ./**/*.js",
-    "lint:watch": "npx eslint-watch -w ./**/*.js",
+    "lint": "eslint --fix *.js",
+    "lint:watch": "npx eslint-watch -w *.js",
     "test": "jest",
     "android:lint": "npm run kill & npm run lint:watch & react-native run-android",
-    "android": "npm run kill & react-native run-android"
+    "android": "npm run kill & react-native run-android",
+    "emu:list": "cd ~/Android/Sdk/tools/bin && ./avdmanager list avd",
+    "emu:run": "cd ~/Android/Sdk/tools && ./emulator -avd"
   },
   "dependencies": {
     "mobx": "^5.9.4",

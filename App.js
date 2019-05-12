@@ -13,7 +13,7 @@ import WRTCConnection from './utils/webrtc/wrtc-connection';
 import { RTCView } from 'react-native-webrtc';
 
 @observer
-export default class App extends Component {
+class App extends Component {
   @observable receiverId = '';
 
   signalConnection = observable.box(null, { deep: true });
@@ -126,3 +126,5 @@ const styles = StyleSheet.create({
     height: 150,
   },
 });
+
+export default App;

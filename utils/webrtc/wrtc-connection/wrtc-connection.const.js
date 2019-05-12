@@ -1,5 +1,5 @@
 export const PEER_CONNECTION_CONF = {
-  iceServers: [{ url: 'stun:stun.l.google.com:19302' }],
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 };
 
 export const WRTC_DATA_CHANNEL_STATUS = {
@@ -9,4 +9,10 @@ export const WRTC_DATA_CHANNEL_STATUS = {
   TRANSMITTING: 'transmitting', // a message was received
   ERROR: 'error',
   CLOSE: 'close',
+};
+
+export const WRTC_DATA_CHANNEL_OPTIONS = {
+  maxRetransmits: 5,
+  maxPacketLifeTime: 1000,
+  ordered: true,
 };
